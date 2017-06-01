@@ -7,7 +7,8 @@ RenderArea::RenderArea(QWidget *parent) :
   QWidget(parent),
   mBackgroundColor(QColor(0, 0, 255)),
   mShapeColor(QColor(255, 255, 255)),
-  mShape(Astroid)  
+  mShape(Astroid),
+  mLastPoint(0, 0)
 {
   on_shape_changed();
 }
@@ -29,27 +30,35 @@ void RenderArea::on_shape_changed()
       mScale = 40;
       mIntervalLength = 2 * M_PI;
       mStepCount = 256;
+      mFirstPoint = true;
       break;
 
     case Cycloid:
       mScale = 4;
       mIntervalLength = 6 * M_PI;
       mStepCount = 128;
+      mFirstPoint = true;
       break;
 
     case HuygensCycloid:
       mScale = 4;
       mIntervalLength = 4 * M_PI;
       mStepCount = 256;
+      mFirstPoint = true;
       break;
 
     case HypoCycloid:
       mScale = 15;
       mIntervalLength = 2 * M_PI;
       mStepCount = 256;
+      mFirstPoint = true;
       break;
 
-    case FutureCurve:
+    case Line:
+      mScale = 50;
+      mIntervalLength = 1;
+      mStepCount = 128;
+      mFirstPoint = true;
       break;
 
     default:
@@ -76,8 +85,8 @@ QPointF RenderArea::compute(float t)
       return compute_hypo(t);
       break;
 
-    case FutureCurve:
-      return compute_future_curve(t);
+    case Line:
+      return compute_line(t);
       break;
 
     default:
@@ -116,12 +125,12 @@ QPointF RenderArea::compute_hypo(float t)
   return QPointF (
         1.5 * (2 * cos(t) + cos (2 * t)),
         1.5 * (2 * sin(t) - sin(2 * t))
-        );
+  );
 }
 
-QPointF RenderArea::compute_future_curve(float t)
+QPointF RenderArea::compute_line(float t)
 {
-  return QPointF (0, 0);
+  return QPointF(1-t, 1-t);
 }
 
 void RenderArea::paintEvent(QPaintEvent *event)
@@ -137,6 +146,7 @@ void RenderArea::paintEvent(QPaintEvent *event)
 
   QPoint center = this->rect().center();
   float step = mIntervalLength / mStepCount;
+
   for (float t =0; t < mIntervalLength; t += step) {
       QPointF point = compute(t);
 
@@ -144,6 +154,17 @@ void RenderArea::paintEvent(QPaintEvent *event)
       pixel.setX(point.x() * mScale + center.x());
       pixel.setY(point.y() * mScale + center.y());
 
-      painter.drawPoint(pixel);
+      // Draws lines between points
+      if (mFirstPoint) {
+          mFirstPoint = false;
+          mLastPoint = pixel;
+        }
+      else {
+          painter.drawLine(mLastPoint, pixel);
+          mLastPoint = pixel;
+      }
+
+      //painter.drawPoint(pixel);
+
     }
 }
