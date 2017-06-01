@@ -7,8 +7,7 @@ RenderArea::RenderArea(QWidget *parent) :
   QWidget(parent),
   mBackgroundColor(QColor(0, 0, 255)),
   mShapeColor(QColor(255, 255, 255)),
-  mShape(Astroid),
-  mLastPoint(0, 0)
+  mShape(Astroid)
 {
   on_shape_changed();
 }
@@ -30,35 +29,30 @@ void RenderArea::on_shape_changed()
       mScale = 40;
       mIntervalLength = 2 * M_PI;
       mStepCount = 256;
-      mFirstPoint = true;
       break;
 
     case Cycloid:
       mScale = 4;
       mIntervalLength = 6 * M_PI;
       mStepCount = 128;
-      mFirstPoint = true;
       break;
 
     case HuygensCycloid:
       mScale = 4;
       mIntervalLength = 4 * M_PI;
       mStepCount = 256;
-      mFirstPoint = true;
       break;
 
     case HypoCycloid:
       mScale = 15;
       mIntervalLength = 2 * M_PI;
       mStepCount = 256;
-      mFirstPoint = true;
       break;
 
     case Line:
       mScale = 50;
       mIntervalLength = 1;
       mStepCount = 128;
-      mFirstPoint = true;
       break;
 
     default:
@@ -145,6 +139,12 @@ void RenderArea::paintEvent(QPaintEvent *event)
   painter.drawRect(this->rect());
 
   QPoint center = this->rect().center();
+
+  QPointF prevPoint = compute(0);
+  QPoint prevPixel;
+  prevPixel.setX(prevPoint.x() * mScale + center.x());
+  prevPixel.setY(prevPoint.y() * mScale + center.y());
+
   float step = mIntervalLength / mStepCount;
 
   for (float t =0; t < mIntervalLength; t += step) {
@@ -154,17 +154,9 @@ void RenderArea::paintEvent(QPaintEvent *event)
       pixel.setX(point.x() * mScale + center.x());
       pixel.setY(point.y() * mScale + center.y());
 
-      // Draws lines between points
-      if (mFirstPoint) {
-          mFirstPoint = false;
-          mLastPoint = pixel;
-        }
-      else {
-          painter.drawLine(mLastPoint, pixel);
-          mLastPoint = pixel;
-      }
-
       //painter.drawPoint(pixel);
+      painter.drawLine(pixel, prevPixel);
 
+      prevPixel = pixel;
     }
 }

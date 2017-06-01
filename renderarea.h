@@ -44,10 +44,6 @@ private:
   int mStepCount;
   float mScale;
   float mIntervalLength;
-
-  // Memebr variables for line drawing
-  bool mFirstPoint = true;
-  QPoint mLastPoint;
 };
 
 #endif // RENDERAREA_H
