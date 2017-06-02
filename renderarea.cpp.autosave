@@ -69,7 +69,7 @@ void RenderArea::on_shape_changed()
 
     case Fancy:
       mScale = 10;
-      mIntervalLength = 18 * M_PI;
+      mIntervalLength = 12 * M_PI;
       mStepCount = 512;
       break;
 
